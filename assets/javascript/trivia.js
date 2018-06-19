@@ -87,6 +87,7 @@ $(document).ready(function () {
         let question = questions[idx]
         return new Promise((resolve, reject) => {
             $('#answers').on('click', '.answer', function (event) {
+                clearTimeout(aTimer);
                 $('#answers').off();
                 console.log($(this).text());
                 console.log(question.correctAnswer)
@@ -105,13 +106,13 @@ $(document).ready(function () {
                 $('#timeRemaining').append(`Time Remaining: ${seconds}`);
                 --seconds;
                 if (seconds < 0) {
-                    clearTimeout(aTimer)
+                    clearTimeout(aTimer);
+                    $('#timesUpModal').modal('show')
                     setTimeout(function () {
                         $('#timesUpModal').modal('hide')
-                        return resolve(false)
+                        return resolve("TIMEOUT")
                     }, dialogTime * 1000);
                 } else {
-                    return resolve(false);
                 }
             }, 1000)
 
@@ -123,14 +124,21 @@ $(document).ready(function () {
             .then((result) => {
                 console.log(`RESULT: ${result}`)
                 console.log(`CORRECT: ${question.correctAnswer}`)
-                if (result == question.correctAnswer) {
-                    $('#correctAnswer').empty()
-                    $('#correctAnswer').text(question.correctAnswer)
-                    let showModal = '#correctAnswerModal'
-                    numRight++
-                } else {
-                    $('#correctAnswer').after(question.correctAnswer)
-                    let showModal = '#timesUpModal'
+                let showModal = "";
+                switch (result) {
+                    case question.correctAnswer:
+                        $('#correctAnswer').empty();
+                        $('#correctAnswer').text(question.correctAnswer);
+                        numRight++;
+                        showModal = '#correctAnswer';
+                    case "TIMEOUT":
+                        showModal = '#timesUpModal'
+                        break;
+                    default:
+                        $('#wrongAnswer').empty();
+                        $('#wrongAnswer').text(question.wrongAnswer);
+                        showModal = '#wrongAnswer';
+                        break;
                 }
 
                 $(showModal).modal('show')
