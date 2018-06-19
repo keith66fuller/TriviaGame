@@ -38,33 +38,58 @@
             <div class="row"></div>
         </div>
     </div>
-
-    <div class="modal fade" id="coorectAnswerModal">
-            <div class="modal-dialog modal-dialog-centered">
-                <div class="modal-dialog">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h4 class="modal-title">Correct!</h4>
-                            <button type="button" class="close" data-dismiss="modal">&times;</button>
-                        </div>
     
-                        <!-- Modal body -->
-                        <div class="modal-body">
-                            <br id="correctAnswer">
-                            <h4>was the right answer.</h4>
-                        </div>
-    
-                        <!-- Modal footer -->
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
-                        </div>
-    
+    <div class="modal fade" id="gameOverModal">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h4 class="modal-title" id="gameOverMsg"></h4>
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
                     </div>
+
+                    <!-- Modal body -->
+                    <div class="modal-body">
+                        <br>
+                        <h4>Play Again?</h4>
+                    </div>
+
+                    <!-- Modal footer -->
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-danger" data-dismiss="modal">Play Again</button>
+                    </div>
+
                 </div>
             </div>
         </div>
-    
-    
+    </div>
+
+    <div class="modal fade" id="correctAnswerModal">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h4 class="modal-title">Correct!</h4>
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    </div>
+
+                    <!-- Modal body -->
+                    <div class="modal-body">
+                        <h4 id="correctAnswer"></h4>
+                        <h4>was the right answer.</h4>
+                    </div>
+
+                    <!-- Modal footer -->
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+
     <div class="modal fade" id="timesUpModal">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-dialog">

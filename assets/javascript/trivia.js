@@ -80,8 +80,11 @@ $(document).ready(function () {
 
 
     $('#timesUpModal').modal('hide')
+    $('#correctAnswerModal').modal('hide')
+    $('#gameOverModal').modal('hide')
 
     function askQuestionByIndex(idx) {
+        let question = questions[idx]
         return new Promise((resolve, reject) => {
             $('#answers').on('click', '.answer', function (event) {
                 $('#answers').off();
@@ -107,32 +110,52 @@ $(document).ready(function () {
                         $('#timesUpModal').modal('hide')
                         return resolve(false)
                     }, dialogTime * 1000);
+                } else {
+                    return resolve(false);
                 }
             }, 1000)
-            
+
         })
     }
     async function playTheGame(qIdx) {
+        let question = questions[qIdx];
         askQuestionByIndex(qIdx)
-        .then((result) => {
+            .then((result) => {
+                console.log(`RESULT: ${result}`)
+                console.log(`CORRECT: ${question.correctAnswer}`)
+                if (result == question.correctAnswer) {
+                    $('#correctAnswer').empty()
+                    $('#correctAnswer').text(question.correctAnswer)
+                    let showModal = '#correctAnswerModal'
+                    numRight++
+                } else {
+                    $('#correctAnswer').after(question.correctAnswer)
+                    let showModal = '#timesUpModal'
+                }
 
-            if (result == question.correctAnswer) {
-                $('#correctAnswerModal').modal('show')
-            } else {
-                $('#correctAnswer').after(question.correctAnswer)
-                $('#timesUpModal').modal('show')
-            }
+                $(showModal).modal('show')
+                setTimeout(function () {
+                    $(showModal).modal('hide')
+
+                }, dialogTime * 1000);
 
 
-
-
-            if (--qIdx >= 0) {
+                if (--qIdx >= 0) {
                     playTheGame(qIdx)
+                } else {
+                    let gameOvermsg = (numRight == questions.length) ? "You Won!" : "You Lost!"
+                    $('#gameOverMsg').empty()
+                    $('#gameOverMsg').text(gameOvermsg)
+                    $('#gameOverModal').modal('show')
                 }
             })
     }
 
+    let numRight = 0
+    function initGame() {
+        numRight = 0
+        playTheGame(questions.length - 1)
+    }
 
-
-    playTheGame(questions.length-1)
+    initGame();
 })
