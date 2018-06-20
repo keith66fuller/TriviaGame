@@ -1,8 +1,4 @@
 $(document).ready(function () {
-    function getTimeLeft(timeout) {
-        return Math.ceil((timeout._idleStart + timeout._idleTimeout - Date.now()) / 1000);
-    }
-
     function shuffle(o) {
         for (var j, x, i = o.length; i; j = parseInt(Math.random() * i), x = o[--i], o[i] = o[j], o[j] = x);
         return o;
@@ -82,10 +78,13 @@ $(document).ready(function () {
     $('#timesUpModal').modal('hide')
     $('#correctAnswerModal').modal('hide')
     $('#gameOverModal').modal('hide')
+    $('#playAgain').on('click', function (event) {
+        initGame();
+    })
 
     function askQuestionByIndex(idx) {
-        let question = questions[idx]
         return new Promise((resolve, reject) => {
+            let question = ask(idx);
             $('#answers').on('click', '.answer', function (event) {
                 clearTimeout(aTimer);
                 $('#answers').off();
@@ -97,7 +96,7 @@ $(document).ready(function () {
                     return resolve(false)
                 }
             })
-            let question = ask(idx);
+            
 
             // time remaining counter
             let seconds = questionTime;
@@ -121,7 +120,7 @@ $(document).ready(function () {
     async function playTheGame(qIdx) {
         let question = questions[qIdx];
         askQuestionByIndex(qIdx)
-            .then((result) => {
+            .then(result => {
                 console.log(`RESULT: ${result}`)
                 console.log(`CORRECT: ${question.correctAnswer}`)
                 let showModal = "";
@@ -130,13 +129,16 @@ $(document).ready(function () {
                         $('#correctAnswer').empty();
                         $('#correctAnswer').text(question.correctAnswer);
                         numRight++;
-                        showModal = '#correctAnswer';
+                        showModal = '#correctAnswerModal';
+                        break;
                     case "TIMEOUT":
+                        $('#correctAnswerTU').empty();
+                        $('#correctAnswerTU').text(question.correctAnswer);
                         showModal = '#timesUpModal'
                         break;
                     default:
                         $('#wrongAnswer').empty();
-                        $('#wrongAnswer').text(question.wrongAnswer);
+                        $('#wrongAnswer').text(question.correctAnswer);
                         showModal = '#wrongAnswer';
                         break;
                 }
@@ -145,17 +147,17 @@ $(document).ready(function () {
                 setTimeout(function () {
                     $(showModal).modal('hide')
 
+                    if (--qIdx >= 0) {
+                        playTheGame(qIdx)
+                    } else {
+                        let gameOvermsg = (numRight == questions.length) ? "You Won!" : "You Lost!"
+                        $('#gameOverMsg').empty()
+                        $('#gameOverMsg').text(gameOvermsg)
+                        $('#gameOverModal').modal('show')
+                    }
                 }, dialogTime * 1000);
 
 
-                if (--qIdx >= 0) {
-                    playTheGame(qIdx)
-                } else {
-                    let gameOvermsg = (numRight == questions.length) ? "You Won!" : "You Lost!"
-                    $('#gameOverMsg').empty()
-                    $('#gameOverMsg').text(gameOvermsg)
-                    $('#gameOverModal').modal('show')
-                }
             })
     }
 
