@@ -70,17 +70,12 @@ $(document).ready(function () {
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     // Constants
     let questionTime = 10; // # of seconds between questions
-    let dialogTime = 4; // # of seconds that will elapse before we close a modal on you.
+    let dialogTime = 4; // # of seconds that will elapse before we close a modal after waiting on you to close it.
 
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-    $('#timesUpModal').modal('hide')
-    $('#correctAnswerModal').modal('hide')
-    $('#gameOverModal').modal('hide')
-    $('#playAgain').on('click', function (event) {
-        initGame();
-    })
+    $('#theModal').modal('hide')
 
     function askQuestionByIndex(idx) {
         return new Promise((resolve, reject) => {
@@ -96,7 +91,7 @@ $(document).ready(function () {
                     return resolve(false)
                 }
             })
-            
+
 
             // time remaining counter
             let seconds = questionTime;
@@ -106,16 +101,33 @@ $(document).ready(function () {
                 --seconds;
                 if (seconds < 0) {
                     clearTimeout(aTimer);
-                    $('#timesUpModal').modal('show')
-                    setTimeout(function () {
-                        $('#timesUpModal').modal('hide')
-                        return resolve("TIMEOUT")
-                    }, dialogTime * 1000);
-                } else {
+                    return resolve("TIMEOUT")
                 }
             }, 1000)
 
         })
+    }
+    function showModalThenHide(title, message, idx) {
+        $('#modalTitle').empty();
+        $('#modalTitle').text(title);
+        $('#modalMsg').empty();
+        $('#modalMsg').text(message);
+        $('#theModal').modal('show')
+        setTimeout(function () {
+            $(theModal).modal('hide')
+
+            if (--idx >= 0) {
+                playTheGame(idx)
+            } else {
+                let gameOvermsg = (numRight == questions.length) ? "You Won!" : "You Lost!"
+                $('#modalMsg').empty()
+                $('#modalMsg').text(gameOvermsg)
+                $('#theModal').modal('show')
+                $('#modalOk').on('click', function (event) {
+                    initGame();
+                })
+            }
+        }, dialogTime * 1000);
     }
     async function playTheGame(qIdx) {
         let question = questions[qIdx];
@@ -123,41 +135,18 @@ $(document).ready(function () {
             .then(result => {
                 console.log(`RESULT: ${result}`)
                 console.log(`CORRECT: ${question.correctAnswer}`)
-                let showModal = "";
                 switch (result) {
                     case question.correctAnswer:
-                        $('#correctAnswer').empty();
-                        $('#correctAnswer').text(question.correctAnswer);
+                        showModalThenHide('Correct!', "The answer was\n" + question.correctAnswer, qIdx);
                         numRight++;
-                        showModal = '#correctAnswerModal';
                         break;
                     case "TIMEOUT":
-                        $('#correctAnswerTU').empty();
-                        $('#correctAnswerTU').text(question.correctAnswer);
-                        showModal = '#timesUpModal'
+                        showModalThenHide('Times UP!!!!', "The answer was\n" + question.correctAnswer, qIdx);
                         break;
                     default:
-                        $('#wrongAnswer').empty();
-                        $('#wrongAnswer').text(question.correctAnswer);
-                        showModal = '#wrongAnswer';
+                        showModalThenHide('Sorry, wrong answer ...', 'The answer was\n' + question.correctAnswer);
                         break;
                 }
-
-                $(showModal).modal('show')
-                setTimeout(function () {
-                    $(showModal).modal('hide')
-
-                    if (--qIdx >= 0) {
-                        playTheGame(qIdx)
-                    } else {
-                        let gameOvermsg = (numRight == questions.length) ? "You Won!" : "You Lost!"
-                        $('#gameOverMsg').empty()
-                        $('#gameOverMsg').text(gameOvermsg)
-                        $('#gameOverModal').modal('show')
-                    }
-                }, dialogTime * 1000);
-
-
             })
     }
 
