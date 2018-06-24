@@ -110,65 +110,51 @@ $(document).ready(function () {
     }
 
     function showModal(title, message) {
-        console.log('SHOW MODAL')
-        return new Promise(async (resolve, reject) => {
+        return new Promise(async (resolve) => {
             [[$('#modalTitle'), title], [$('#modalMsg'), message]].map(e => { $(e[0]).empty().text(e[1]) });
-            $('#theModal').modal('show').on('click', resolve())
+            $('#theModal').modal('show')
+            $('#modalOk').on('click', resolve())
         })
     }
+
     
-    
-    function showModalThenHide(title, message) {
-        console.log('SHOW MODAL')
-        return new Promise(async (resolve, reject) => {
-            [[$('#modalTitle'), title], [$('#modalMsg'), message]].map(e => { $(e[0]).empty().text(e[1]) });
-            $('#theModal').modal('show').on('click', resolve())
-
-
-            let seconds = dialogTime
-            sTimer = setInterval(function () {
-                console.log(`S-INTERVAL ${sTimer} ${seconds}`)
-                seconds--
-                if (seconds < 0) {
-                    console.log("HIDE MODAL")
-                    clearInterval(sTimer)
-                    $('#theModal').modal('hide');
-                    return resolve('DONE')
-                }
-            }, 1000)
-
-
-
-
-
-        })
-    }
-    async function playTheGame(qIdx) {
-        console.log('PLAY GAME')
-        let question = questions[qIdx];
-        var x = await askQuestionByIndex(qIdx)
-        console.log('QUESTION ASKED')
-        
-        var y = await showModal('foobar', `The answer was\n${question.answers[question.correctAnswer]}`)
-        var z = await waitResolve(dialogTime)
-        $('#theModal').modal('hide');
-        console.log("CLEAR TIMEOUT")
-        clearTimeout(aTimer)
-        if (--qIdx >= 0) {
-            playTheGame(qIdx)
-        } else {
-            $('#modalMsg').empty().text(`${(numRight == questions.length) ? "You Won!" : "You Lost!"}\n${numRight} out of ${questions.length}`)
-            $('#theModal').modal('show').on('click', () => { initGame() });
-        }
-    }
-
     function waitResolve(t) {
-        return new Promise(resolve => {
+        return new Promise((resolve, reject) => {
+            $('#modalOk').on('click', () => reject());
             setTimeout(() => {
+                $('#modalOk').off('click');
                 resolve('resolved');
             }, t * 1000);
         });
     }
+
+
+    async function playTheGame(qIdx) {
+        console.log('PLAY GAME')
+        let question = questions[qIdx];
+        console.log('ASK QUESTION')
+        var x = await askQuestionByIndex(qIdx)
+        .catch(() => console.log('AQBI ERR ${err}'))
+        console.log('SHOW MODAL')
+        var y = await showModal('foobar', `The answer was\n${question.answers[question.correctAnswer]}`)
+        .catch((err) => console.log(`SHOW MODAL ERR ${err}`))
+        console.log('WAITRESOLVE')
+        var z = await waitResolve(dialogTime)
+        .catch((err) => console.log(`WAITRESOLVE ERR ${err}`))
+        $('#theModal').modal('hide');
+        console.log("CLEAR TIMEOUT")
+        console.log(`QIDX: ${qIdx}`)
+
+        clearTimeout(aTimer)
+        if (--qIdx >= 0) {
+            playTheGame(qIdx)
+        } else {
+            $('#modalMsg').empty().text(`${(numRight == questions.length) ? "You Won!" : "You Lost!"}\n${numRight} out of ${questions.length}`);
+            // $('#theModal').modal('show');
+            // $('#modalOk').on('click', () => { initGame() });
+        }
+    }
+
 
     /*ooo        ooooo            .o.            ooooo      ooooo      ooo 
     `88.       .888'           .888.           `888'      `888b.     `8' 
@@ -180,6 +166,8 @@ $(document).ready(function () {
                                                                          
                                                                          
                                                                          */
+
+
 
     $('#theModal').modal('hide')
 
