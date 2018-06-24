@@ -78,13 +78,6 @@ $(document).ready(function () {
                 $('#theModal').modal('hide');
             });
     }
-    function gameOver() {
-        return new Promise(resolve => {
-            showModal('Game Over', `${(numRight == questions.length) ? "You Won!" : "You Lost!"}\n${numRight} out of ${questions.length} correct.`, false)
-        })
-            .then(initGame)
-    }
-
     async function initGame() {
         numRight = 0
         for (let i = 0; i < questions.length; i++) {
@@ -124,13 +117,29 @@ $(document).ready(function () {
                 }, 1000)
             })
                 .then(async result => {
-                    clearTimeout(aTimer)
-                    console.log(`RESULT: ${result}`)
+                    clearInterval(aTimer)
                     await showModal(result, `The answer was\n${question.answers[question.correctAnswer]}`, true)
                 })
-            clearTimeout(aTimer)
+                clearInterval(aTimer)
         }
-        await gameOver();
+        new Promise(async resolve => {
+            clearInterval(aTimer)
+            console.log('GAME OVER 1')
+            // await showModal('Game Over', `${(numRight == questions.length) ? "You Won!" : "You Lost!"}\n${numRight} out of ${questions.length} correct.`, false)
+            $('#goTitle').empty().text('Game Over')
+            $('#goMsg').empty().text(`${(numRight == questions.length) ? "You Won!" : "You Lost!"}\n${numRight} out of ${questions.length} correct.`)
+            $('#goModal').modal('show')
+            return new Promise((resolve, reject) => {
+                $('#playAgain').on('click', () => resolve());
+            })
+                .then(() => {
+                    $('#playAgain').off('click');
+                    $('#goModal').modal('hide');
+                    initGame();
+                });
+    
+            console.log('GAME OVER 2')
+        });
     }
 
     /*ooo        ooooo            .o.            ooooo      ooooo      ooo 
@@ -147,7 +156,6 @@ $(document).ready(function () {
 
 
     $('#theModal').modal('hide')
-
 
     initGame();
 })
